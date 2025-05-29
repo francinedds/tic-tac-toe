@@ -24,15 +24,30 @@ function App() {
     if (squares[index] === 'X') img = <img src={imagemX} alt="X" />;
     else if (squares[index] === 'O') img = <img src={imagemO} alt="O" />;
 
+    const isWinningSquare = winningLine.includes(index);
+    const squareClass = isWinningSquare ? "square winning-square" : "square";
+
     return (
-      <button className="square" onClick={() => handleClick(index)}>
+      <button className={squareClass} onClick={() => handleClick(index)}>
         {img}
       </button>
     );
   };
 
-  const winner = calculateWinner(squares);
-  const status = winner ? `Vencedor: ${winner}` : `next: ${isXNext ? 'X' : 'O'}`;
+  const winnerData = calculateWinner(squares);
+  const winner = winnerData?.player;
+  const winningLine = winnerData?.line || [];
+  const status = winner
+  ? (
+      <span>
+        winner: {winner === 'X' ? <img src={imagemX} alt="Vencedor X" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} /> : <img src={imagemO} alt="Vencedor O" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} />}
+      </span>
+    )
+  : (
+      <span>
+        next: {isXNext ? <img src={imagemX} alt="X" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} /> : <img src={imagemO} alt="O" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} />}
+      </span>
+    );
 
   return (
     <div className="game">
@@ -72,7 +87,7 @@ function calculateWinner(squares) {
   ];
   for (let [a, b, c] of lines) {
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      return { player: squares[a], line: [a, b, c] };
     }
   }
   return null;
