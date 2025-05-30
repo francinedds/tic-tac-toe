@@ -68,6 +68,7 @@ body {
   }
 
   .game-main{
+    position: relative;
     background-color: var(--pink-light);
     padding: 20px 60px 20px;
     margin-bottom: 10px;
@@ -128,4 +129,28 @@ body {
     border: none;
     padding: 0;
     cursor: pointer;
+  }
+
+  .winner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0); /* fundo escuro semi-transparente */
+    backdrop-filter: blur(3px); /* opcional: desfoca o fundo */
+    z-index: 9; /* abaixo da animação, acima do tabuleiro */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .winner-animation {
+    z-index: 10;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  
+  .winner-animation img {
+    width: 200px;
+    height: auto;
   }

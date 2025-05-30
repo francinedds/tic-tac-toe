@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 import imagemX from './assets/X.png';
 import imagemO from './assets/O.png';
 import restartImage from './assets/restart-button.png';
 import closeIcon from './assets/close-button.png';
 import minimizeIcon from './assets/minimize-button.png';
+import pixilFrame0 from './assets/frames/pixil-frame-0.png';
+import pixilFrame1 from './assets/frames/pixil-frame-1.png';
 
 function App() {
   const [squares, setSquares] = useState(Array(9).fill(null));
   const [isXNext, setIsXNext] = useState(true);
+  const [frameIndex, setFrameIndex] = useState(null);
 
   const handleClick = (index) => {
     if (squares[index] || calculateWinner(squares)) return;
@@ -48,6 +51,29 @@ function App() {
         next: {isXNext ? <img src={imagemX} alt="X" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} /> : <img src={imagemO} alt="O" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} />}
       </span>
     );
+  
+    const winnerFrames = [pixilFrame0, pixilFrame1];
+    const winnerAnimation = frameIndex !== null ? (
+      <div className="winner-overlay">
+        <div className="winner-animation">
+          <img src={winnerFrames[frameIndex]} alt={`Frame ${frameIndex}`} />
+        </div>
+      </div>
+    ) : null;
+
+    useEffect(() => {
+      let interval;
+      if (winner) {
+        setFrameIndex(0);
+        interval = setInterval(() => {
+          setFrameIndex(prev => (prev === 0 ? 1 : 0));
+        }, 500); // troca de frame a cada 500ms
+      } else {
+        setFrameIndex(null);
+      }
+    
+      return () => clearInterval(interval); // limpa ao desmontar
+    }, [winner]);
 
   return (
     <div className="game">
@@ -63,7 +89,7 @@ function App() {
         <main className="game-main">
           <div className="status">{status}</div>
 
-          <div className="board">
+          <div className="board">{winnerAnimation}
             {[0, 1, 2].map((row) => (
               <div key={row} className="board-row">
                 {[0, 1, 2].map((col) => renderSquare(row * 3 + col))}
