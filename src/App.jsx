@@ -5,8 +5,10 @@ import imagemO from './assets/O.png';
 import restartImage from './assets/restart-button.png';
 import closeIcon from './assets/close-button.png';
 import minimizeIcon from './assets/minimize-button.png';
-import pixilFrame0 from './assets/frames/pixil-frame-0.png';
-import pixilFrame1 from './assets/frames/pixil-frame-1.png';
+import pixilFrame0 from './assets/frames-youwin/pixil-frame-0.png';
+import pixilFrame1 from './assets/frames-youwin/pixil-frame-1.png';
+import pixilFrameGameOver0 from './assets/frames-gameover/pixil-frame-gameover-0.png';
+import pixilFrameGameOver1 from './assets/frames-gameover/pixil-frame-gameover-1.png';
 
 function App() {
   const [squares, setSquares] = useState(Array(9).fill(null));
@@ -21,6 +23,13 @@ function App() {
     setSquares(newSquares);
     setIsXNext(!isXNext);
   };
+
+  const restartGame = () => {
+    setSquares(Array(9).fill(null));
+    setIsXNext(true);
+    setFrameIndex(null);
+  };
+
 
   const renderSquare = (index) => {
     let img = null;
@@ -38,21 +47,23 @@ function App() {
   };
 
   const winnerData = calculateWinner(squares);
-  const winner = winnerData?.player;
+  const winner = winnerData?.player; // detecta ganhador 
+  const isDraw = !winner && squares.every(square => square !== null); // detecta empate
   const winningLine = winnerData?.line || [];
-  const status = winner
-  ? (
-      <span>
-        winner: {winner === 'X' ? <img src={imagemX} alt="Vencedor X" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} /> : <img src={imagemO} alt="Vencedor O" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} />}
-      </span>
-    )
-  : (
-      <span>
-        next: {isXNext ? <img src={imagemX} alt="X" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} /> : <img src={imagemO} alt="O" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} />}
-      </span>
-    );
+  const status = winner ? ( 
+    <span>
+      winner: {winner === 'X' ? <img src={imagemX} alt="Vencedor X" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} /> : <img src={imagemO} alt="Vencedor O" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} />}
+    </span>
+  ) : isDraw ? (
+    <span>Draw!</span>
+  ) : (
+    <span>
+      next: {isXNext ? <img src={imagemX} alt="X" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} /> : <img src={imagemO} alt="O" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} />}
+    </span>
+  );
   
-    const winnerFrames = [pixilFrame0, pixilFrame1];
+    const winnerFrames = [pixilFrame0, pixilFrame1]; // frames ganhador
+    const drawFrames = [pixilFrameGameOver0, pixilFrameGameOver1]; // frames empate
     const winnerAnimation = frameIndex !== null ? (
       <div className="winner-overlay">
         <div className="winner-animation">
@@ -60,20 +71,28 @@ function App() {
         </div>
       </div>
     ) : null;
+    const drawAnimation = frameIndex !== null && isDraw ? ( 
+      <div className="draw-overlay">
+        <div className="draw-animation">
+          <img src={drawFrames[frameIndex]} alt={`Draw Frame ${frameIndex}`} />
+        </div>
+        </div>
+      ) : null;
 
     useEffect(() => {
       let interval;
-      if (winner) {
+        
+      if (winner || isDraw) {
         setFrameIndex(0);
         interval = setInterval(() => {
           setFrameIndex(prev => (prev === 0 ? 1 : 0));
-        }, 500); // troca de frame a cada 500ms
+        }, 500);
       } else {
         setFrameIndex(null);
       }
-    
-      return () => clearInterval(interval); // limpa ao desmontar
-    }, [winner]);
+        
+      return () => clearInterval(interval);
+    }, [winner, isDraw]); 
 
   return (
     <div className="game">
@@ -89,7 +108,7 @@ function App() {
         <main className="game-main">
           <div className="status">{status}</div>
 
-          <div className="board">{winnerAnimation}
+          <div className="board">{isDraw ? drawAnimation : winnerAnimation}
             {[0, 1, 2].map((row) => (
               <div key={row} className="board-row">
                 {[0, 1, 2].map((col) => renderSquare(row * 3 + col))}
@@ -97,7 +116,10 @@ function App() {
             ))}
           </div>
         </main>
-        <button onClick={() => window.location.reload()}>
+        <button onClick={(e) => {
+          e.preventDefault();
+          restartGame();
+        }}>
           <img src={restartImage} alt="Reiniciar" className="reload-icon" title="Click to restart the game"/>
         </button>
       </div>
